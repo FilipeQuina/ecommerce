@@ -9,7 +9,7 @@ $app = new Slim();
 $app->config('debug', true);
 
 
-$app->get('/ecommerce/admin', function() {
+$app->get('/restrito', function() {
     
 	$page = new PageAdmin();
 	echo("as");
