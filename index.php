@@ -5,6 +5,7 @@ use \Slim\Slim;
 use \Hcode\Page;
 use \Hcode\PageAdmin;
 use \Hcode\Model\User;
+use \Hcode\Model\Category;
 
 $app = new Slim();
 
@@ -26,7 +27,6 @@ $app->get('/admin/login/', function() {
 		"footer"=>false
 	]);
 	$page->setTpl("login");
-
 });
 $app->post('/admin/login/', function() {
     
@@ -46,7 +46,6 @@ $app->get("/admin/users", function(){
 	$page->setTpl("users", array(
 		"users"=>$users
 	));
-
 });
 $app->post("/admin/users/create", function(){
 	User::verify_login();
@@ -63,9 +62,7 @@ $app->get("/admin/users/:iduser/delete", function($iduser){
 	User::verify_login();
 	$user = new User();
 	$user->get((int)$iduser);
-	echo($iduser);
-	var_dump($user);
-	exit;
+	
 	$user->delete();
 	header("Location: http://localhost/ecommerce/admin/users");
 	exit;
@@ -93,6 +90,99 @@ $app->post("/admin/users/:iduser", function($iduser){
 	header("Location: http://localhost/ecommerce/admin/users");
 	exit;
 });
+$app->get("/admin/forgot",function(){
+	$page = new PageAdmin([
+		"header"=>false,
+		"footer"=>false
+	]);
+	$page->setTpl("forgot");
+});
+$app->post("/admin/forgot",function(){
+	$user = User::getForgot($_POST["email"]);
+	header("Location: http://localhost/ecommerce/admin/forgot/sent");
+	exit;
+});
+$app->get("/admin/forgot/sent", function(){
+	$page = new PageAdmin([
+		"header"=>false,
+		"footer"=>false
+	]);
+	$page->setTpl("forgot-sent");
+});
+$app->get("/admin/forgot/reset",function(){
+	$user= User::validForgotDecrypt($_GET["code"]);
+	$page = new PageAdmin([
+		"header"=>false,
+		"footer"=>false
+	]);
+	$page->setTpl("forgot-reset", array(
+		"name"=>$user["desperson"],
+		"code"=>$_GET["code"]
+	));
+});
+$app->post("/admin/forgot/reset",function(){
+	$forgot= User::validForgotDecrypt($_POST["code"]);
+	User::setForgotUsed($forgot["idrecovery"]);
+	$user = new User();
+	$user->get((int)$forgot["iduser"]);
+	$password = password_hash($_POST["password"], PASSWORD_DEFAULT,[
+		"cost"=>12
+	]);
+	$user->setPassword($password);
+	$page = new PageAdmin([
+		"header"=>false,
+		"footer"=>false
+	]);
+	$page->setTpl("forgot-reset-success");
+});
+$app->get("/admin/categories", function(){
+	User::verify_login();
+	$categories = Category::listAll();
+	$page = new PageAdmin();
+	$page->setTpl("categories",[
+		'categories'=>$categories
+	]);
+});
+$app->get("/admin/categories/create", function(){
+	User::verify_login();
+	$page = new PageAdmin();
+	$page->setTpl("categories-create");
+});
+$app->post("/admin/categories/create", function(){
+	User::verify_login();
+	$category = new Category();
+	$category->setData($_POST);
+	$category->save();
+	header("Location: http://localhost/ecommerce/admin/categories");
+	exit;
+});
+$app->get("/admin/categories/:idcategory/delete", function($idcategory){
+	User::verify_login();
+	$category = new Category();
+	$category->get((int)$idcategory);
+	$category->delete();
+	header("Location: http://localhost/ecommerce/admin/categories");
+	exit;
+});
+$app->get("/admin/categories/:idcategory", function($idcategory){
+	User::verify_login();
+	$category = new Category();
+	$category->get((int)$idcategory);
+	$page = new PageAdmin();
+	$page->setTpl("categories-update",[
+		"category"=>$category->getvalues()
+	]);
+});
+$app->post("/admin/categories/:idcategory", function($idcategory){
+	User::verify_login();
+	$category = new Category();
+	$category->get((int)$idcategory);
+	$category->setData($_POST);
+	$category->save();
+	header("Location: http://localhost/ecommerce/admin/categories");
+	exit;
+});
+
 
 
 $app->run();
