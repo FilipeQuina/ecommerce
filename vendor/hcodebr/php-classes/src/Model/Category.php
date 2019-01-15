@@ -32,8 +32,14 @@ class Category extends Model
         $sql = new Sql();
         $sql->query("DELETE FROM tb_categories WHERE idcategory =:idcategory",[
             ":idcategory"=>$this->getidcategory()
-        ]
-    );
-
+        ] );
+    }
+    public static function updateFile(){
+        $categories = Caegory::listAll();
+        $html = [];
+        foreach ($categories as $row ) {
+            array_push($html, '<li><a href="/category/'.$row['$idcategory'].'">'.$row['$descategory'].'</a></li>');
+        }
+        
     }
 }
