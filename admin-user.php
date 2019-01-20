@@ -1,6 +1,6 @@
 <?php
 use \Hcode\PageAdmin;
-use \Hcode\User;
+use \Hcode\Model\User;
 
 $app->get("/admin/users", function(){
 	User::verify_login();

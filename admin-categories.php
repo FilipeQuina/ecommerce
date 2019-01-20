@@ -1,7 +1,7 @@
 <?php
 use \Hcode\PageAdmin;
-use \Hcode\User;
-use \Hcode\Category;
+use \Hcode\Model\User;
+use \Hcode\Model\Category;
 $app->get("/admin/categories", function(){
 	User::verify_login();
 	$categories = Category::listAll();
